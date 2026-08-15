@@ -1,11 +1,33 @@
 import Fastify, { type FastifyInstance } from "fastify";
+import { SchoolSafeError, type ApiErrorBody } from "./http/errors.js";
+import { newRequestId } from "./http/request-id.js";
 
 export type BuildAppOptions = {
   testRoutes?: boolean;
 };
 
-export function buildApp(_options: BuildAppOptions = {}): FastifyInstance {
+export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
   const app = Fastify({ logger: false });
+
+  app.setErrorHandler((error, _request, reply) => {
+    const requestId = newRequestId();
+    const known = error instanceof SchoolSafeError;
+    const body: ApiErrorBody = {
+      code: known ? error.code : "INTERNAL_ERROR",
+      message: known ? error.publicMessage : "Erreur interne",
+      request_id: requestId,
+      retryable: known ? error.retryable : false
+    };
+    reply.status(known ? error.statusCode : 500).send(body);
+  });
+
   app.get("/health", async () => ({ status: "ok" as const }));
+
+  if (options.testRoutes) {
+    app.get("/__test/error", async () => {
+      throw new SchoolSafeError(400, "VALIDATION_INVALID", "Donnée invalide", false);
+    });
+  }
+
   return app;
 }
