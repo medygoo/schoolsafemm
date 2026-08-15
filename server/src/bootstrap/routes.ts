@@ -1,4 +1,4 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyReply } from "fastify";
 import type { AuthVerifier } from "../auth/session.js";
 import { verifyBearerAuthorization } from "../auth/session.js";
 import { newRequestId } from "../http/request-id.js";
@@ -11,7 +11,7 @@ export type BootstrapRouteDependencies = {
   service: BootstrapService;
 };
 
-function sendAuthError(reply: Parameters<FastifyInstance["post"]>[2] extends never ? never : any) {
+function sendAuthError(reply: FastifyReply) {
   return reply.status(401).send({
     code: "AUTH_REQUIRED",
     message: "Authentification requise",
