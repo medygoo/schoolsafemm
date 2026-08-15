@@ -39,7 +39,7 @@ allowed_cidrs = ["0.0.0.0/0"]
 allowed_cidrs_v6 = ["::/0"]
 
 [realtime]
-enabled = true
+enabled = false
 
 [studio]
 enabled = false
@@ -48,7 +48,7 @@ enabled = false
 enabled = false
 
 [storage]
-enabled = true
+enabled = false
 file_size_limit = "50MiB"
 
 [auth]
