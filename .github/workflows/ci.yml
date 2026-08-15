@@ -22,6 +22,8 @@ jobs:
         run: npm ci
       - name: Reject high and critical dependency vulnerabilities
         run: npm audit --audit-level=high
+      - name: Build and inspect self-contained auth SDK
+        run: npm run build:auth-sdk && npm run check:auth-sdk
       - name: Typecheck and unit tests
         run: npm run ci
       - name: Reject tracked private-key assignments
