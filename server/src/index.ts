@@ -1,7 +1,7 @@
 import { buildApp } from "./app.js";
+import { parseEnv } from "./config/env.js";
 
-const host = process.env.HOST ?? "127.0.0.1";
-const port = Number(process.env.PORT ?? "8787");
+const env = parseEnv(process.env);
 const app = buildApp();
 
-await app.listen({ host, port });
+await app.listen({ host: env.HOST, port: env.PORT });
