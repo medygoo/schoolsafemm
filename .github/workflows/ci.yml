@@ -5,20 +5,30 @@ on:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   health-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
       - name: Install locked dependencies
         run: npm ci
-      - name: Verify health contract and types
+      - name: Test Node 22 type alignment
+        shell: bash
         run: |
+          npm install -D --workspace server @types/node@22
           npm run test --workspace server -- health.test.ts
           npm run typecheck --workspace server
+          npm list --workspace server @types/node
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add server/package.json package-lock.json
+          git diff --cached --quiet || git commit -m "fix: align Node types with runtime"
+          git push origin HEAD:${GITHUB_HEAD_REF}
