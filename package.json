@@ -5,6 +5,11 @@
   "scripts": {
     "typecheck": "npm run typecheck --workspace server",
     "test": "npm run test --workspace server",
-    "ci": "npm run typecheck && npm test"
+    "ci": "npm run typecheck && npm test",
+    "test:e2e:existing": "node app/qa-smoke.cjs && node app/qa-pwa.cjs && node app/qa-i18n.cjs",
+    "test:e2e:staging": "npm run test:e2e:existing"
+  },
+  "devDependencies": {
+    "playwright": "1.53.1"
   }
 }
