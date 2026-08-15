@@ -1,4 +1,5 @@
 import Fastify, { type FastifyInstance } from "fastify";
+import { registerBootstrapRoutes, type BootstrapRouteDependencies } from "./bootstrap/routes.js";
 import { defaultReadinessProbe, type ReadinessProbe } from "./health/readiness.js";
 import { SchoolSafeError, type ApiErrorBody } from "./http/errors.js";
 import { newRequestId } from "./http/request-id.js";
@@ -6,6 +7,7 @@ import { newRequestId } from "./http/request-id.js";
 export type BuildAppOptions = {
   testRoutes?: boolean;
   readinessProbe?: ReadinessProbe;
+  bootstrap?: BootstrapRouteDependencies;
 };
 
 export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
@@ -33,6 +35,10 @@ export function buildApp(options: BuildAppOptions = {}): FastifyInstance {
     }
     return { status: "ready" as const };
   });
+
+  if (options.bootstrap) {
+    registerBootstrapRoutes(app, options.bootstrap);
+  }
 
   if (options.testRoutes) {
     app.get("/__test/error", async () => {
