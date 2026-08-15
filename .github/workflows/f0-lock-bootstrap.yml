@@ -1,0 +1,27 @@
+name: Bootstrap F0 lockfile
+on:
+  push:
+    branches: ["staging/foundation-f0-2026-08-15"]
+permissions:
+  contents: write
+jobs:
+  lockfile:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: staging/foundation-f0-2026-08-15
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --package-lock-only --ignore-scripts
+      - name: Commit lockfile if changed
+        shell: bash
+        run: |
+          if git diff --quiet -- package-lock.json; then exit 0; fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package-lock.json
+          git commit -m "chore: lock F0 dependencies"
+          git push origin HEAD:staging/foundation-f0-2026-08-15
