@@ -10,6 +10,6 @@
     "test:e2e:staging": "npm run test:e2e:existing"
   },
   "devDependencies": {
-    "playwright": "1.53.1"
+    "playwright": "1.62.1"
   }
 }
