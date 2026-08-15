@@ -1,15 +1,22 @@
 {
   "name": "schoolsafe-v2",
   "private": true,
-  "workspaces": ["server"],
+  "workspaces": [
+    "server"
+  ],
   "scripts": {
     "typecheck": "npm run typecheck --workspace server",
     "test": "npm run test --workspace server",
     "ci": "npm run typecheck && npm test",
     "test:e2e:existing": "node app/qa-smoke.cjs && node app/qa-pwa.cjs && node app/qa-i18n.cjs",
-    "test:e2e:staging": "npm run test:e2e:existing"
+    "test:e2e:staging": "npm run test:e2e:existing",
+    "supabase:start": "supabase start",
+    "supabase:reset": "supabase db reset",
+    "test:rls": "node scripts/run-rls-tests.mjs"
   },
   "devDependencies": {
-    "playwright": "1.62.1"
+    "pg": "8.23.0",
+    "playwright": "1.62.1",
+    "supabase": "2.114.0"
   }
 }
