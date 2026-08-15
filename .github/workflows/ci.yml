@@ -20,6 +20,8 @@ jobs:
           cache: npm
       - name: Install locked dependencies
         run: npm ci
+      - name: Reject high and critical dependency vulnerabilities
+        run: npm audit --audit-level=high
       - name: Typecheck and unit tests
         run: npm run ci
       - name: Reject tracked private-key assignments
