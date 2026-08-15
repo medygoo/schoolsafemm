@@ -5,31 +5,20 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
-  red-health:
+  health-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Bootstrap locked dependencies
-        shell: bash
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Verify health contract and types
         run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install --workspace server fastify zod
-            npm install -D --workspace server typescript vitest @types/node tsx
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add package.json package-lock.json server/package.json
-            git diff --cached --quiet || git commit -m "chore: lock F0 dependencies"
-            git push origin HEAD:${GITHUB_HEAD_REF}
-          fi
-      - name: RED health test
-        run: npm run test --workspace server -- health.test.ts
+          npm run test --workspace server -- health.test.ts
+          npm run typecheck --workspace server
