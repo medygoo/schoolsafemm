@@ -8,6 +8,8 @@
     "typecheck": "npm run typecheck --workspace server",
     "test": "npm run test --workspace server",
     "ci": "npm run typecheck && npm test",
+    "build:auth-sdk": "esbuild frontend/vendor/supabase-entry.js --bundle --format=iife --global-name=SchoolSafeSupabaseSDK --outfile=app/vendor/supabase-sdk.js",
+    "check:auth-sdk": "node scripts/check-auth-bundle.mjs",
     "test:e2e:existing": "node app/qa-smoke.cjs && node app/qa-pwa.cjs && node app/qa-i18n.cjs",
     "test:e2e:staging": "npm run test:e2e:existing",
     "supabase:start": "supabase start",
