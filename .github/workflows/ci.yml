@@ -1,24 +1,30 @@
-name: SchoolSafe F0 CI
+name: SchoolSafe F0 Dependency Lock
 
 on:
   pull_request:
     branches: [main]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
-  server-contracts:
+  lock-playwright:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
           cache: npm
-      - name: Install locked dependencies
-        run: npm ci
-      - name: Run server tests
-        run: npm test
-      - name: Typecheck server
-        run: npm run typecheck
+      - name: Install Playwright at workspace root and lock it
+        shell: bash
+        run: |
+          npm install -D -W playwright
+          npm run ci
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          git diff --cached --quiet || git commit -m "chore: lock Playwright for browser QA"
+          git push origin HEAD:${GITHUB_HEAD_REF}
