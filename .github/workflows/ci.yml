@@ -1,0 +1,60 @@
+name: SchoolSafe CI
+
+on:
+  pull_request:
+    branches: ["main"]
+
+permissions:
+  contents: read
+
+jobs:
+  server-contracts:
+    name: server-contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Typecheck and unit tests
+        run: npm run ci
+      - name: Reject tracked private-key assignments
+        shell: bash
+        run: |
+          if git grep -nE '(SUPABASE_SERVICE_ROLE_KEY|R2_SECRET_ACCESS_KEY|VAPID_PRIVATE_KEY)=[^[:space:]]+' -- .; then
+            echo "A private credential assignment is tracked by Git."
+            exit 1
+          fi
+
+  existing-browser-qa:
+    name: existing-browser-qa
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run existing SchoolSafe browser QA
+        shell: powershell
+        run: |
+          $chrome = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+          if (-not (Test-Path $chrome)) { throw "Google Chrome not found at expected path: $chrome" }
+          $server = Start-Process node -ArgumentList "app/server.mjs" -PassThru
+          try {
+            Start-Sleep -Seconds 3
+            $env:SCHOOLSAFE_URL = "http://127.0.0.1:4175/"
+            $env:CHROME_PATH = $chrome
+            npm run test:e2e:existing
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+          finally {
+            if ($server -and -not $server.HasExited) { Stop-Process -Id $server.Id -Force }
+          }
