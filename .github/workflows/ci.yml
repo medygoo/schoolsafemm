@@ -1,0 +1,47 @@
+name: SchoolSafe CI
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  server-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run server contracts
+        run: npm run ci
+      - name: Reject tracked privileged secret assignments
+        shell: bash
+        run: |
+          if git grep -nE '^(SUPABASE_SERVICE_ROLE_KEY|R2_SECRET_ACCESS_KEY|VAPID_PRIVATE_KEY)=.+' -- ':!package-lock.json'; then
+            echo "Privileged secret assignment found in tracked files"
+            exit 1
+          fi
+
+  existing-browser-qa:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Run existing browser QA
+        shell: powershell
+        run: |
+          Start-Process node -ArgumentList "app/server.mjs"
+          Start-Sleep -Seconds 2
+          $env:SCHOOLSAFE_URL="http://127.0.0.1:4175/"
+          npm run test:e2e:existing
