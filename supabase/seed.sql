@@ -1,0 +1,2 @@
+-- SchoolSafe F1 local/staging seed.
+-- Synthetic-only data is added by F1 migrations/tests. Never place production data here.
