@@ -15,8 +15,12 @@
     "test:rls": "node scripts/run-rls-tests.mjs"
   },
   "devDependencies": {
+    "esbuild": "0.28.2",
     "pg": "8.23.0",
     "playwright": "1.62.1",
     "supabase": "2.114.0"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.112.3"
   }
 }
